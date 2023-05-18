@@ -399,6 +399,7 @@ export default {
         }).then(() => {
           axios.delete(`http://20.205.33.112:2333/delete?id=${ids}`)
                .then(res=>{
+                console.log(res)
                  if(res.data.code===200){
                    this.$message.success('批量删除成功')
                    this.getTicketList()
