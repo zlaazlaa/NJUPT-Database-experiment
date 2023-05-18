@@ -250,7 +250,7 @@ export default {
   methods:{
     // 获取票务信息列表
     getTicketList(){
-      axios.get('http://localhost:5000/query')
+      axios.get('http://20.205.33.112:2333/query')
            .then(res=>{
              if(res.data.code===200){
                this.ticketList=res.data.data
@@ -265,7 +265,7 @@ export default {
     },
     // 搜索票务信息
     searchTicket(){
-      axios.get('http://localhost:5000/query',{
+      axios.get('http://20.205.33.112:2333/query',{
               params:{
                 flightNumber:this.searchForm.flightNumber
               }
@@ -324,7 +324,7 @@ export default {
         if(valid){
           if(this.isAdd){
             // 新增操作
-            axios.post('http://localhost:5000/insert',this.form)
+            axios.post('http://20.205.33.112:2333/insert',this.form)
                  .then(res=>{
                    if(res.data.code===200){
                      this.$message.success('添加成功')
@@ -340,7 +340,7 @@ export default {
                  })
           }else{
             // 修改操作
-            axios.put('http://localhost:5000/update',this.form)
+            axios.put('http://20.205.33.112:2333/update',this.form)
                  .then(res=>{
                    if(res.data.code===200){
                      this.$message.success('修改成功')
@@ -368,7 +368,7 @@ export default {
           cancelButtonText: '取消',
           type: 'warning'
         }).then(() => {
-          axios.delete(`http://localhost:5000/delete?id=${id}`)
+          axios.delete(`http://20.205.33.112:2333/delete?id=${id}`)
                .then(res=>{
                  if(res.data.code===200){
                    this.$message.success('删除成功')
@@ -397,7 +397,7 @@ export default {
           cancelButtonText: '取消',
           type: 'warning'
         }).then(() => {
-          axios.delete(`http://localhost:5000/delete?id=${ids}`)
+          axios.delete(`http://20.205.33.112:2333/delete?id=${ids}`)
                .then(res=>{
                  if(res.data.code===200){
                    this.$message.success('批量删除成功')
