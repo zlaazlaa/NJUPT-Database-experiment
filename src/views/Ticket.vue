@@ -250,7 +250,7 @@ export default {
   methods:{
     // 获取票务信息列表
     getTicketList(){
-      axios.get('https://20.205.33.112:2333/query')
+      axios.get('https://database-experiment-flask.azurewebsites.net/query')
            .then(res=>{
              if(res.data.code===200){
                this.ticketList=res.data.data
@@ -265,7 +265,7 @@ export default {
     },
     // 搜索票务信息
     searchTicket(){
-      axios.get('https://20.205.33.112:2333/query',{
+      axios.get('https://database-experiment-flask.azurewebsites.net/query',{
               params:{
                 flightNumber:this.searchForm.flightNumber
               }
@@ -324,7 +324,7 @@ export default {
         if(valid){
           if(this.isAdd){
             // 新增操作
-            axios.post('https://20.205.33.112:2333/insert',this.form)
+            axios.post('https://database-experiment-flask.azurewebsites.net/insert',this.form)
                  .then(res=>{
                    if(res.data.code===200){
                      this.$message.success('添加成功')
@@ -340,7 +340,7 @@ export default {
                  })
           }else{
             // 修改操作
-            axios.put('https://20.205.33.112:2333/update',this.form)
+            axios.put('https://database-experiment-flask.azurewebsites.net/update',this.form)
                  .then(res=>{
                    if(res.data.code===200){
                      this.$message.success('修改成功')
@@ -368,7 +368,7 @@ export default {
           cancelButtonText: '取消',
           type: 'warning'
         }).then(() => {
-          axios.delete(`https://20.205.33.112:2333/delete?id=${id}`)
+          axios.delete(`https://database-experiment-flask.azurewebsites.net/delete?id=${id}`)
                .then(res=>{
                  if(res.data.code===200){
                    this.$message.success('删除成功')
@@ -397,7 +397,7 @@ export default {
           cancelButtonText: '取消',
           type: 'warning'
         }).then(() => {
-          axios.delete(`https://20.205.33.112:2333/delete?id=${ids}`)
+          axios.delete(`https://database-experiment-flask.azurewebsites.net/delete?id=${ids}`)
                .then(res=>{
                 console.log(res)
                  if(res.data.code===200){
