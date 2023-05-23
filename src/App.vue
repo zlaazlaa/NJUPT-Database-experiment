@@ -1,7 +1,7 @@
 <template>
   <div id='app'> <img src='./assets/logo.png'> <router-view />
-    <div class='buttons'> <button class='button' @click='goToTicket'>查询所有机票</button> <button class='button'
-        @click='goToSearch'>根据航班号和日期查询机票</button> </div>
+    <!-- <div class='buttons'> <button class='button' @click='goToTicket'>查询所有机票</button> <button class='button'
+        @click='goToSearch'>根据航班号和日期查询机票</button> </div> -->
   </div>
 </template>
 
@@ -44,4 +44,9 @@ export default {
 
  .button:focus {
    outline: none;
- }</style>
+ }
+
+ img {
+   height: 80px;
+ }
+</style>
