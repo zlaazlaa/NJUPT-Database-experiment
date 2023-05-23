@@ -8,6 +8,8 @@
             <button class="btn btn-query" @click="queryTickets">查询</button>
         </div>
 
+        <button class="btn btn-add" @click="showModal">添加机票</button>
+
         <table class="centered-table">
             <thead>
                 <tr>
@@ -45,8 +47,6 @@
                 </tr>
             </tbody>
         </table>
-
-        <button class="btn btn-add" @click="showModal">添加机票</button>
 
         <div class="modal" v-if="isModalVisible">
             <div class="modal-content">
