@@ -1,11 +1,11 @@
 import Vue from 'vue'
 import Router from 'vue-router'
-import HelloWorld from '@/components/HelloWorld'
-import Ticket from '@/views/Ticket'
-import Search from '@/views/SearchTicket'
+// import HelloWorld from '@/components/HelloWorld'
+// import Ticket from '@/views/Ticket'
+// import Search from '@/views/SearchTicket'
 import Main from '@/views/Main'
-import Login from '@/views/Login'
-import Manage from '@/views/Manage'
+import Login from '@/views/Login.vue'
+import Manage from '@/views/Manage.vue'
 
 Vue.use(Router)
 
@@ -15,14 +15,6 @@ export default new Router({
       path: '/',
       name: 'HelloWorld',
       component: Main
-    }, {
-      path: '/ticket',
-      name: 'ticket',
-      component: Ticket
-    }, {
-      path: '/search',
-      name: 'search',
-      component: Search
     }, {
       path: '/main',
       name: 'main',
@@ -35,6 +27,10 @@ export default new Router({
       path: '/manage',
       name: 'manage',
       component: Manage
+    }, {
+      path: '/userinfo',
+      name: 'userinfo',
+      component: () => import('@/views/UserInfo.vue')
     }
   ]
 })
