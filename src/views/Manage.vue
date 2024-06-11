@@ -1,359 +1,341 @@
 <template>
-    <div id="app">
-        <h1>机票管理——B20090611马青宇</h1>
+    <div class="container">
+        <div class="home" @click="() => $router.push('/userinfo')">
+            <h4>用户信息</h4>
+        </div>
+
+        <h1>图书管理——B21090117朱梓烨</h1>
 
         <div class="search-bar">
-            <input type="text" v-model="queryFlightNumber" placeholder="航班号">
-            <input type="date" v-model="queryDate" placeholder="日期">
-            <button class="btn btn-query" @click="queryTickets">查询</button>
+            <input type="text" v-model="queryStr" placeholder="关键词">
+            <button @click="queryBooks">查询</button>
+            <button v-if="isAdmin()" @click="addBooks">添加</button>
         </div>
 
-        <button class="btn btn-add" @click="showModal">添加机票</button>
+        <el-table :data="tableData" border style="width: 100%">
+            <el-table-column prop="id" label="编号" :width="100" :resizable="false" align="center">
+            </el-table-column>
+            <el-table-column prop="name" label="书名" align="center">
+            </el-table-column>
+            <el-table-column prop="author" label="作者" align="center">
+            </el-table-column>
+            <el-table-column prop="publisher" label="出版社" align="center">
+            </el-table-column>
+            <el-table-column prop="status" label="借阅状态" :width="80" align="center">
+            </el-table-column>
+            <el-table-column prop="category" label="类型" align="center">
+            </el-table-column>
+            <el-table-column prop="sum" label="图书总量" align="center" :width="100">
+            </el-table-column>
+            <el-table-column prop="available_sum" label="可借数量" align="center" :width="100">
+            </el-table-column>
+            <el-table-column v-if="!isAdmin()" fixed="right" label="操作" width="120" align="center">
+                <template slot-scope="scope">
+                    <el-button @click.native.prevent="borrowBooks(tableData[scope.$index])" type="text" size="small">
+                        借阅
+                    </el-button>
+                </template>
+            </el-table-column>
+            <el-table-column v-else fixed="right" label="操作" width="120" align="center">
+                <template slot-scope="scope">
+                    <el-button @click.native.prevent="modifyBooks(tableData[scope.$index])" type="text" size="small">
+                        修改
+                    </el-button>
+                    <el-button @click.native.prevent="deleteBooks(tableData[scope.$index])" type="text" size="small">
+                        删除
+                    </el-button>
+                </template>
+            </el-table-column>
+        </el-table>
 
-        <table class="centered-table">
-            <thead>
-                <tr>
-                    <th>航班号</th>
-                    <th>出发地</th>
-                    <th>目的地</th>
-                    <th>日期</th>
-                    <th>出发时刻</th>
-                    <th>到达时刻</th>
-                    <th>剩余座位数</th>
-                    <th>票价</th>
-                    <th>折扣票价</th>
-                    <th>折扣率</th>
-                    <th>航空公司</th>
-                    <th>操作</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr v-for="ticket in tickets" :key="ticket.id">
-                    <td>{{ ticket.flightNumber }}</td>
-                    <td>{{ ticket.departure }}</td>
-                    <td>{{ ticket.destination }}</td>
-                    <td>{{ ticket.date }}</td>
-                    <td>{{ ticket.departureTime }}</td>
-                    <td>{{ ticket.arrivalTime }}</td>
-                    <td>{{ ticket.availableSeats }}</td>
-                    <td>{{ ticket.price }}</td>
-                    <td>{{ ticket.discountPrice }}</td>
-                    <td>{{ ticket.discountRate }}</td>
-                    <td>{{ ticket.airline }}</td>
-                    <td>
-                        <button class="btn btn-edit" @click="editTicket(ticket.id)">编辑</button>
-                        <button class="btn btn-delete" @click="deleteTicket(ticket.id)">删除</button>
-                    </td>
-                </tr>
-            </tbody>
-        </table>
+        <el-pagination @current-change="changePage" layout="prev, pager, next" :total="allData.length" :page-size="pageSize" :pager-count="11">
+        </el-pagination>
 
-        <div class="modal" v-if="isModalVisible">
-            <div class="modal-content">
-                <h2>{{ isEditMode ? '编辑机票' : '添加机票' }}</h2>
-                <form @submit.prevent="isEditMode ? updateTicket() : addTicket()">
-                    <label for="flightNumber">航班号:</label>
-                    <input type="text" id="flightNumber" v-model="form.flightNumber" required>
-
-                    <label for="departure">出发地:</label>
-                    <input type="text" id="departure" v-model="form.departure" required>
-
-                    <label for="destination">目的地:</label>
-                    <input type="text" id="destination" v-model="form.destination" required>
-
-                    <label for="date">日期:</label>
-                    <input type="date" id="date" v-model="form.date" required>
-
-                    <label for="departureTime">出发时刻:</label>
-                    <input type="text" id="departureTime" v-model="form.departureTime" required>
-
-                    <label for="arrivalTime">到达时刻:</label>
-                    <input type="text" id="arrivalTime" v-model="form.arrivalTime" required>
-
-                    <label for="availableSeats">剩余座位数:</label>
-                    <input type="number" id="availableSeats" v-model="form.availableSeats" required>
-
-                    <label for="price">票价:</label>
-                    <input type="number" id="price" v-model="form.price" required>
-
-                    <label for="discountPrice">折扣票价:</label>
-                    <input type="number" id="discountPrice" v-model="form.discountPrice" required>
-
-                    <label for="discountRate">折扣率:</label>
-                    <input type="number" id="discountRate" v-model="form.discountRate" required>
-
-                    <label for="airline">航空公司:</label>
-                    <input type="text" id="airline" v-model="form.airline" required>
-
-                    <button class="btn btn-submit" type="submit">{{ isEditMode ? '更新' : '添加' }}</button>
-                    <button class="btn btn-cancel" @click="closeModal">取消</button>
-                </form>
-            </div>
-        </div>
+        <el-dialog :title="isAddMode ? '添加' : '编辑'" :visible.sync="dialogVisible" width="30%">
+            <el-form label-width="80px">
+                <el-form-item label="书名">
+                    <el-input v-model="choseItem.name"></el-input>
+                </el-form-item>
+                <el-form-item label="作者">
+                    <el-input v-model="choseItem.author"></el-input>
+                </el-form-item>
+                <el-form-item label="出版社">
+                    <el-input v-model="choseItem.publisher"></el-input>
+                </el-form-item>
+                <el-form-item label="借阅状态">
+                    <el-input v-model="choseItem.status"></el-input>
+                </el-form-item>
+                <el-form-item label="类型">
+                    <el-input v-model="choseItem.category"></el-input>
+                </el-form-item>
+                <el-form-item label="图书总量">
+                    <el-input v-model="choseItem.sum"></el-input>
+                </el-form-item>
+                <el-form-item label="可借数量">
+                    <el-input v-model="choseItem.available_sum"></el-input>
+                </el-form-item>
+                <el-button type="primary" @click="confirmModify">确认{{ isAddMode ? "添加" : "修改" }}</el-button>
+            </el-form>
+        </el-dialog>
     </div>
 </template>
-  
+
 <script>
+let gotStr = ""
+function propcessTemp(tempStr) {
+    console.log("processing: ", tempStr.length);
+    gotStr += tempStr
+    const items = gotStr.split('\n')
+    return items.map(item => {
+        const values = item.split('\t')
+        if (values.length < 8) {
+            gotStr = item
+            return
+        }
+        return {
+            'id': values[0],
+            'name': values[1],
+            'author': values[2],
+            'publisher': values[3],
+            'status': values[4],
+            'category': values[5],
+            'sum': values[6],
+            'available_sum': values[7],
+        }
+    })
+}
+function splitStr(str, len = 1000) {
+    const result = []
+    let temp = ''
+    for (let i = 0; i < str.length; i++) {
+        temp += str[i]
+        if (temp.length >= len) {
+            result.push(temp)
+            temp = ''
+        }
+    }
+    if (temp.length > 0) {
+        result.push(temp)
+    }
+    return result
+}
+
 export default {
     data() {
         return {
+            tableData: [],
             tickets: [],
             queryFlightNumber: '',
-            queryDate: '',
-            isModalVisible: false,
+            queryStr: '',
+            dialogVisible: false,
             isEditMode: false,
-            form: {
-                id: '',
-                flightNumber: '',
-                departure: '',
-                destination: '',
-                date: '',
-                departureTime: '',
-                arrivalTime: '',
-                availableSeats: '',
-                price: '',
-                discountPrice: '',
-                discountRate: '',
-                airline: ''
-            }
+            isAddMode: false,
+            choseItem: {},
+            allData: [],
+            pageSize: 20,
         };
     },
     mounted() {
-        this.showTickets();
+        this.showBooks();
+    },
+    computed: {
+        pageNums: () => {
+            return Math.ceil(this.allData.length / 10);
+        }
     },
     methods: {
-        showTickets() {
-            fetch('https://database-experiment-flask.azurewebsites.net/tickets')
-                .then(response => response.json())
-                .then(data => {
-                    if (data.code === 200) {
-                        this.tickets = data.data;
-                    } else {
-                        alert('获取机票失败');
-                    }
-                });
+        isAdmin() {
+            return localStorage.getItem('role') === 'admin';
         },
-        addTicket() {
-            fetch('https://database-experiment-flask.azurewebsites.net/add', {
+        changePage(page) {
+            this.tableData = this.allData.slice((page - 1) * 20, page * 20);
+        },
+        async showBooks() {
+            const resp = await fetch('https://database-experiment-flask.azurewebsites.net/books')
+            const reader = resp.body.getReader();
+            const decoder = new TextDecoder();
+            while (true) {
+                const { done, value } = await reader.read();
+                if (done) {
+                    break;
+                } else {
+                    console.log("reading: ", value.length);
+                }
+                const tempStr = decoder.decode(value, { stream: true });
+                const splited = splitStr(tempStr);
+                for (const str of splited) {
+                    const items = propcessTemp(str)
+                    items.forEach(item => {
+                        if (item) {
+                            this.allData.push(item);
+                        }
+                    })
+                }
+                if(this.tableData.length <= this.pageSize) {
+                    this.changePage(1)
+                }
+            }
+            // fetch('https://database-experiment-flask.azurewebsites.net/books')
+            //     .then(response => response.json())
+            //     .then(data => {
+            //         if (data.code === 200) {
+            //             this.tableData = data.data;
+            //         } else {
+            //             alert('获取图书失败');
+            //         }
+            //     });
+        },
+        borrowBooks(choseItem) {
+            fetch(`https://database-experiment-flask.azurewebsites.net/books_borrow/${choseItem.id}`, {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(this.form)
             })
                 .then(response => response.json())
                 .then(data => {
                     if (data.code === 200) {
-                        this.closeModal();
-                        this.showTickets();
+                        alert('借阅成功');
+                        choseItem.available_sum -= 1;
                     } else {
-                        alert('添加机票失败');
+                        alert(data.message)
                     }
                 });
         },
-        editTicket(id) {
-            fetch(`https://database-experiment-flask.azurewebsites.net/ticket/${id}`)
+        queryBooks() {
+            console.log(this.queryStr);
+            // alert(this.queryStr)
+            // book_query
+            // search string
+            fetch(`https://database-experiment-flask.azurewebsites.net/books_query?search=${this.queryStr}`)
                 .then(response => response.json())
                 .then(data => {
-                    if (data.code === 200) {
-                        this.isModalVisible = true;
-                        this.isEditMode = true;
-                        this.form = data.data;
-                    } else {
-                        alert('获取机票信息失败');
-                    }
+                    this.tableData = data.data;
                 });
         },
-        updateTicket() {
-            fetch(`https://database-experiment-flask.azurewebsites.net/update/${this.form.id}`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(this.form)
-            })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.code === 200) {
-                        this.closeModal();
-                        this.showTickets();
-                    } else {
-                        alert('更新机票失败');
-                    }
-                });
+        modifyBooks(choseItem) {
+            this.isAddMode = false;
+            this.choseItem = choseItem;
+            this.dialogVisible = true;
         },
-        deleteTicket(id) {
-            if (confirm('确认删除该机票吗？')) {
-                fetch(`https://database-experiment-flask.azurewebsites.net/delete/${id}`, {
-                    method: 'POST'
+        confirmModify() {
+            this.choseItem.status = parseInt(this.choseItem.status);
+            console.log(this.choseItem);
+            if (this.isAddMode) {
+                fetch(`https://database-experiment-flask.azurewebsites.net/books`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(this.choseItem),
                 })
                     .then(response => response.json())
                     .then(data => {
                         if (data.code === 200) {
-                            this.showTickets();
+                            alert('add成功');
+                            this.dialogVisible = false;
                         } else {
-                            alert('删除机票失败');
+                            alert('add失败');
+                        }
+                    });
+            } else {
+                fetch(`https://database-experiment-flask.azurewebsites.net/books/${this.choseItem.id}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(this.choseItem),
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.code === 200) {
+                            alert('修改成功');
+                            this.dialogVisible = false;
+                        } else {
+                            alert('修改失败');
                         }
                     });
             }
         },
-        queryTickets() {
-            const query = {};
-            if (this.queryFlightNumber) {
-                query.flightNumber = this.queryFlightNumber;
-            }
-            if (this.queryDate) {
-                query.date = this.queryDate;
-            }
-            fetch(`https://database-experiment-flask.azurewebsites.net/query`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(query)
+        deleteBooks(choseItem) {
+            fetch(`https://database-experiment-flask.azurewebsites.net/books/${choseItem.id}`, {
+                method: 'DELETE',
             })
                 .then(response => response.json())
                 .then(data => {
+                    console.log(data);
                     if (data.code === 200) {
-                        this.tickets = data.data;
+                        alert('删除成功');
+                        this.showBooks();
                     } else {
-                        alert('查询机票失败');
+                        alert('删除失败');
                     }
                 });
         },
-        showModal() {
-            this.isModalVisible = true;
-            this.isEditMode = false;
-            this.form = {
-                id: '',
-                flightNumber: '',
-                departure: '',
-                destination: '',
-                date: '',
-                departureTime: '',
-                arrivalTime: '',
-                availableSeats: '',
-                price: '',
-                discountPrice: '',
-                discountRate: '',
-                airline: ''
+        addBooks() {
+            this.choseItem = {
+                'name': '',
+                'author': '',
+                'publisher': '',
+                'status': 0,
+                'category': '',
+                'sum': 0,
+                'available_sum': 0,
             };
+            this.isAddMode = true;
+            this.dialogVisible = true;
         },
-        closeModal() {
-            this.isModalVisible = false;
-        }
     }
 };
 </script>
-  
+
 <style scoped>
-/* 表格样式 */
-.centered-table {
-    margin: 0 auto;
-    border-collapse: collapse;
-    /* 合并边框 */
-    width: 100%;
+.container {
+    margin: 20px;
 }
 
-.centered-table th,
-.centered-table td {
-    border: 1px solid #ccc;
-    padding: 8px;
+.home {
+    position: absolute;
+    width: 100px;
+    height: 50px;
+    border-radius: 50%;
+    right: 10px;
+    top: 10px;
+    background-color: cyan;
+    align-content: center;
     text-align: center;
-}
-
-.centered-table th {
-    background-color: #f2f2f2;
-}
-
-.centered-table tr:hover {
-    background-color: #f5f5f5;
-}
-
-/* 输入框样式 */
-input[type="text"],
-input[type="number"],
-input[type="date"] {
-    width: 10%;
-    padding: 8px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-}
-
-/* 按钮样式 */
-.btn {
-    padding: 10px 15px;
-    border: none;
-    border-radius: 3px;
+    box-shadow: 8px 10px 5px rgba(0, 0, 0, 0.5);
     cursor: pointer;
-    color: #fff;
+    user-select: none;
 }
 
-.btn-edit {
-    background-color: #f5b942;
-    margin-right: 5px;
+/* 取消文字复制、选中 */
+.home h4 {
+    margin: 0;
+    user-select: none;
+    text-shadow: 2px 2px 2px rgba(0, 0, 0, 0.5);
 }
 
-.btn-delete {
-    background-color: #f55f5f;
-}
-
-.btn-add {
-    background-color: #42b3f5;
+.search-bar {
     margin-bottom: 20px;
-}
-
-.btn-submit {
-    background-color: #42b3f5;
-    margin-right: 5px;
-}
-
-.btn-cancel {
-    background-color: #ccc;
-    color: #000;
-}
-
-/* 模态框样式 */
-.modal {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
     display: flex;
-    align-items: center;
     justify-content: center;
-    background-color: rgba(0, 0, 0, 0.5);
 }
 
-.modal-content {
-    background-color: #fff;
-    padding: 20px;
-    border-radius: 5px;
-}
-
-.modal h2 {
-    text-align: center;
-    margin-bottom: 20px;
-}
-
-.modal label {
-    display: block;
-    margin-bottom: 5px;
-}
-
-.modal input {
-    width: 100%;
-    padding: 8px;
-    margin-bottom: 10px;
+.search-bar input {
+    padding: 5px;
+    font-size: 16px;
     border: 1px solid #ccc;
-    border-radius: 4px;
-}
-.btn-query {
-  background-color: #00b300; /* 绿色 */
+    border-radius: 5px;
+    width: 50%;
+    margin-right: 10px;
 }
 
-.centered-table {
-  margin-top: 20px;
+.search-bar button {
+    padding: 10px 20px;
+    margin: 0px 10px 0px 10px;
+    font-size: 18px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
 }
 </style>

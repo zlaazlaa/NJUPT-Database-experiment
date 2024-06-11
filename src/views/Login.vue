@@ -1,81 +1,149 @@
 <template>
-    <div class="container">
-      <h1 class="title">票务管理系统登录——B20090611马青宇</h1>
-      <form @submit.prevent="login">
-        <div class="input-group">
-          <label for="username">账号</label>
-          <input id="username" v-model="username" type="text" required />
-        </div>
-        <div class="input-group">
-          <label for="password">密码</label>
-          <input id="password" v-model="password" type="password" required />
-        </div>
-        <button type="submit">登录</button>
-      </form>
+  <div class="container">
+    <h1 class="title">欢迎使用票务管理系统</h1>
+    <h1>B21090117朱梓烨</h1>
+    <div class="loginfo">
+      <div class="input-group">
+        <label for="username">账号</label>
+        <input id="username" v-model="username" type="text" required />
+      </div>
+      <div class="input-group">
+        <label for="password">密码</label>
+        <input id="password" v-model="password" type="password" required />
+      </div>
+      <div style="display: flex; justify-content: space-evenly;">
+        <button type="button" @click="login">登录</button>
+        <button type="button" @click="register">注册</button>
+      </div>
     </div>
-  </template>
-  
-  <script>
-  export default {
-    data() {
-      return {
-        username: "admin",
-        password: "admin",
-      };
+  </div>
+</template>
+
+<script>
+
+export default {
+  data() {
+    return {
+      username: "admin",
+      password: "password123",
+    };
+  },
+  methods: {
+    login() {
+      fetch("https://database-experiment-flask.azurewebsites.net/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          "student_id": this.username,
+          "password": this.password
+        })
+      })
+        .then((response) => response.json())
+        .then((data) => {
+          console.log("login: ", data);
+          if (data.code === 200) {
+            alert("登录成功");
+            this.$router.push("/manage");
+            localStorage.setItem("role", data.role === "admin" ? "admin" : "user")
+            localStorage.setItem("student_id", data.user_id)
+          } else {
+            throw data.message
+          }
+        })
+        .catch((msg) => {
+          alert(msg);
+        });
+      // if (this.username === "admin" && this.password === "admin") {
+      //   alert("登录成功");
+      //   this.$router.push("/manage");
+      //   localStorage.setItem("role", "admin")
+      // } else if (this.username === "user" && this.password === "user") {
+      //   alert("登录成功");
+      //   this.$router.push("/manage");
+      //   localStorage.setItem("role", "user")
+      // } else {
+      //   alert("账号或密码错误");
+      // }
     },
-    methods: {
-      login() {
-        // 假设正确的账号密码是admin和123456
-        if (this.username === "admin" && this.password === "admin") {
-          alert("登录成功");
-          // 跳转到票务管理页面
-          this.$router.push("/manage");
-        } else {
-          alert("账号或密码错误");
-        }
-      },
+    register() {
+      fetch("https://database-experiment-flask.azurewebsites.net/register", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          "student_id": this.username,
+          "name": "暂无",
+          "class": "暂无",
+          "age": "暂无",
+          "gender": "暂无",
+          "password": this.password
+        })
+      })
+        .then((response) => response.json())
+        .then((data) => {
+          if (data.code === 200) {
+            alert("注册成功");
+          } else {
+            throw data.message
+          }
+        }).catch((msg) => {
+          alert(msg);
+        });
     },
-  };
-  </script>
-  
-  <style scoped>
-  .container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    margin-top: 50px;
-  }
-  
-  .title {
-    font-size: 36px;
-    margin-bottom: 20px;
-  }
-  
-  .input-group {
-    display: flex;
-    align-items: center;
-    margin-bottom: 10px;
-  }
-  
-  label {
-    width: 80px;
-  }
-  
-  input {
-    width: 200px;
-    padding: 5px;
-    margin-left: 10px;
-  }
-  
-  button {
-    padding: 10px 15px;
-    font-size: 18px;
-    margin-top: 10px;
-    border: none;
-    border-radius: 3px;
-    background-color: #42b3f5;
-    color: #fff;
-    cursor: pointer;
-  }
-  </style>
-  
+  },
+};
+</script>
+
+<style scoped>
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.title {
+  font-size: 36px;
+  margin-bottom: 20px;
+}
+
+.input-group {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+label {
+  width: 80px;
+}
+
+input {
+  flex: 1;
+  padding: 5px;
+  font-size: 16px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+button {
+  padding: 10px 20px;
+  font-size: 18px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.loginfo {
+  background-color: rgba(255, 255, 255, 0.8);
+  padding: 20px;
+  border-radius: 5px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  margin-top: 20px;
+  width: 300px;
+  text-align: center;
+}
+</style>
