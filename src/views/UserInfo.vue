@@ -1,6 +1,13 @@
 <template>
     <div class="container">
-        <el-form label-width="80px">
+        <el-table v-if="isAdmin()" :data="tableData">
+            <el-table-column prop="student_id" label="学号"></el-table-column>
+            <el-table-column prop="name" label="姓名"></el-table-column>
+            <el-table-column prop="class" label="班级"></el-table-column>
+            <el-table-column prop="age" label="年龄"></el-table-column>
+            <el-table-column prop="gender" label="性别"></el-table-column>
+        </el-table>
+        <el-form v-else label-width="80px">
             <el-form-item label="学号">
                 <el-input v-model="student_id"></el-input>
             </el-form-item>
@@ -16,9 +23,11 @@
             <el-form-item label="性别">
                 <el-input v-model="gender"></el-input>
             </el-form-item>
+        </el-form>
+        <div class="return">
             <el-button type="primary" round @click="changePwd">确认修改</el-button>
             <el-button round @click="returnPage">返回</el-button>
-        </el-form>
+        </div>
     </div>
 </template>
 
@@ -31,12 +40,20 @@ export default {
             "classroom": "",
             "age": 0,
             "gender": "",
+            tableData: []
         }
     },
     mounted() {
-        this.getUserInfo();
+        if(this.isAdmin()) {
+            this.getAllUserInfo();
+        } else {
+            this.getUserInfo();
+        }
     },
     methods: {
+        isAdmin() {
+            return localStorage.getItem('role') === 'admin';
+        },
         async getUserInfo() {
             const that = this
             fetch('https://service-eq5qyvbi-1314518256.gz.tencentapigw.com.cn/release/users/' + localStorage.getItem('student_id'), {
@@ -49,6 +66,13 @@ export default {
                     that.classroom = data.data.class;
                     that.age = data.data.age;
                     that.gender = data.data.gender;
+                })
+        },
+        async getAllUserInfo() {
+            fetch('https://service-eq5qyvbi-1314518256.gz.tencentapigw.com.cn/release/users')
+                .then(response => response.json())
+                .then(data => {
+                    this.tableData = data.data;
                 })
         },
         changePwd() {
@@ -90,5 +114,9 @@ export default {
     width: 50%;
     margin: 0 auto;
     padding-top: 50px;
+}
+
+.return {
+    margin-top: 20px;
 }
 </style>
