@@ -151,9 +151,11 @@ export default {
             this.tableData = this.allData.slice((page - 1) * 20, page * 20);
         },
         async showBooks() {
-            const resp = await fetch('https://database-experiment-flask.azurewebsites.net/books')
+            gotStr = ''
+            const resp = await fetch('https://service-eq5qyvbi-1314518256.gz.tencentapigw.com.cn/release/books')
             const reader = resp.body.getReader();
             const decoder = new TextDecoder();
+            this.allData = [];
             while (true) {
                 const { done, value } = await reader.read();
                 if (done) {
@@ -175,18 +177,9 @@ export default {
                     this.changePage(1)
                 }
             }
-            // fetch('https://database-experiment-flask.azurewebsites.net/books')
-            //     .then(response => response.json())
-            //     .then(data => {
-            //         if (data.code === 200) {
-            //             this.tableData = data.data;
-            //         } else {
-            //             alert('获取图书失败');
-            //         }
-            //     });
         },
         borrowBooks(choseItem) {
-            fetch(`https://database-experiment-flask.azurewebsites.net/books_borrow/${choseItem.id}`, {
+            fetch(`https://service-eq5qyvbi-1314518256.gz.tencentapigw.com.cn/release/books_borrow/${choseItem.id}`, {
                 method: 'POST',
             })
                 .then(response => response.json())
@@ -199,16 +192,35 @@ export default {
                     }
                 });
         },
-        queryBooks() {
+
+        async queryBooks() {
+            gotStr = ''
             console.log(this.queryStr);
-            // alert(this.queryStr)
-            // book_query
-            // search string
-            fetch(`https://database-experiment-flask.azurewebsites.net/books_query?search=${this.queryStr}`)
-                .then(response => response.json())
-                .then(data => {
-                    this.tableData = data.data;
-                });
+            const resp = await fetch(`https://service-eq5qyvbi-1314518256.gz.tencentapigw.com.cn/release/books_query?search=${this.queryStr}`)
+            const reader = resp.body.getReader();
+            const decoder = new TextDecoder();
+            this.allData = [];
+            while (true) {
+                const { done, value } = await reader.read();
+                if (done) {
+                    break;
+                } else {
+                    console.log("reading: ", value.length);
+                }
+                const tempStr = decoder.decode(value, { stream: true });
+                const splited = splitStr(tempStr);
+                for (const str of splited) {
+                    const items = propcessTemp(str)
+                    items.forEach(item => {
+                        if (item) {
+                            this.allData.push(item);
+                        }
+                    })
+                }
+                if(this.tableData.length <= this.pageSize) {
+                    this.changePage(1)
+                }
+            }
         },
         modifyBooks(choseItem) {
             this.isAddMode = false;
@@ -219,7 +231,7 @@ export default {
             this.choseItem.status = parseInt(this.choseItem.status);
             console.log(this.choseItem);
             if (this.isAddMode) {
-                fetch(`https://database-experiment-flask.azurewebsites.net/books`, {
+                fetch(`https://service-eq5qyvbi-1314518256.gz.tencentapigw.com.cn/release/books`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -236,7 +248,7 @@ export default {
                         }
                     });
             } else {
-                fetch(`https://database-experiment-flask.azurewebsites.net/books/${this.choseItem.id}`, {
+                fetch(`https://service-eq5qyvbi-1314518256.gz.tencentapigw.com.cn/release/books/${this.choseItem.id}`, {
                     method: 'PUT',
                     headers: {
                         'Content-Type': 'application/json',
@@ -255,7 +267,7 @@ export default {
             }
         },
         deleteBooks(choseItem) {
-            fetch(`https://database-experiment-flask.azurewebsites.net/books/${choseItem.id}`, {
+            fetch(`https://service-eq5qyvbi-1314518256.gz.tencentapigw.com.cn/release/books/${choseItem.id}`, {
                 method: 'DELETE',
             })
                 .then(response => response.json())

@@ -39,7 +39,7 @@ export default {
     methods: {
         async getUserInfo() {
             const that = this
-            fetch('https://database-experiment-flask.azurewebsites.net/users/' + localStorage.getItem('student_id'), {
+            fetch('https://service-eq5qyvbi-1314518256.gz.tencentapigw.com.cn/release/users/' + localStorage.getItem('student_id'), {
                 method: 'GET'
             })
                 .then(response => response.json())
@@ -52,13 +52,13 @@ export default {
                 })
         },
         changePwd() {
-            fetch('https://database-experiment-flask.azurewebsites.net/users', {
+            fetch('https://service-eq5qyvbi-1314518256.gz.tencentapigw.com.cn/release/users', {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
-                    "id": "28",
+                    "id": 27,
                     "student_id": this.student_id,
                     "name": this.name,
                     "class": this.classroom,
@@ -72,10 +72,10 @@ export default {
                     if (data.code === 200) {
                         alert("修改成功");
                     } else {
-                        throw new Error("修改失败");
+                        throw new Error(data.message);
                     }
                 }).catch(err => {
-                    alert("修改失败");
+                    alert(err);
                 });
         },
         returnPage() {
