@@ -1,6 +1,6 @@
 <template>
   <div class="container">
-    <h1 class="title">欢迎使用票务管理系统</h1>
+    <h1 class="title">欢迎使用图书管理系统</h1>
     <h1>B21090117朱梓烨</h1>
     <div class="loginfo">
       <div class="input-group">
@@ -30,7 +30,7 @@ export default {
   },
   methods: {
     login() {
-      fetch("https://database-experiment-flask.azurewebsites.net/login", {
+      fetch("https://service-eq5qyvbi-1314518256.gz.tencentapigw.com.cn/release/login", {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
@@ -46,6 +46,7 @@ export default {
           if (data.code === 200) {
             alert("登录成功");
             this.$router.push("/manage");
+            localStorage.setItem('id', data.id)
             localStorage.setItem("role", data.role === "admin" ? "admin" : "user")
             localStorage.setItem("student_id", data.user_id)
           } else {
@@ -68,7 +69,7 @@ export default {
       // }
     },
     register() {
-      fetch("https://database-experiment-flask.azurewebsites.net/register", {
+      fetch("https://service-eq5qyvbi-1314518256.gz.tencentapigw.com.cn/release/register", {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
@@ -77,7 +78,7 @@ export default {
           "student_id": this.username,
           "name": "暂无",
           "class": "暂无",
-          "age": "暂无",
+          "age": 18,
           "gender": "暂无",
           "password": this.password
         })
